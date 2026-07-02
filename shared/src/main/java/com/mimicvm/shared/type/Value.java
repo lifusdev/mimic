@@ -12,7 +12,15 @@ public record Value(Type type, long bits) {
         return new Value(Type.I32, data);
     }
 
+    public static Value i64(long data) {
+        return new Value(Type.I64, data);
+    }
+
     public int data() {
         return (int) bits;
+    }
+
+    public long asI64() {
+        return bits;
     }
 }

@@ -44,6 +44,12 @@ public final class Interpreter implements Opcodes {
                     frame.getStack().push(Value.i64(value));
                 }
 
+                case F64_CONST -> {
+                    final long value = ByteUtils.readI64(insns, pc);
+                    pc += 8;
+                    frame.getStack().push(Value.f64(Double.longBitsToDouble(value)));
+                }
+
                 case LOCAL_GET -> {
                     final int idx = insns[pc++] & 0xFF;
                     frame.getStack().push(frame.getLocals().get(idx));
@@ -110,6 +116,30 @@ public final class Interpreter implements Opcodes {
                     }
 
                     frame.getStack().push(Value.i64(a / b));
+                }
+
+                case F64_ADD -> {
+                    final double b = frame.getStack().pop().asF64();
+                    final double a = frame.getStack().pop().asF64();
+                    frame.getStack().push(Value.f64(a + b));
+                }
+
+                case F64_SUB -> {
+                    final double b = frame.getStack().pop().asF64();
+                    final double a = frame.getStack().pop().asF64();
+                    frame.getStack().push(Value.f64(a - b));
+                }
+
+                case F64_MUL -> {
+                    final double b = frame.getStack().pop().asF64();
+                    final double a = frame.getStack().pop().asF64();
+                    frame.getStack().push(Value.f64(a * b));
+                }
+
+                case F64_DIV -> {
+                    final double b = frame.getStack().pop().asF64();
+                    final double a = frame.getStack().pop().asF64();
+                    frame.getStack().push(Value.f64(a / b));
                 }
 
                 case CALL -> {

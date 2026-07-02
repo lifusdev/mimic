@@ -6,6 +6,7 @@ public interface Opcodes {
     int LOCAL_GET = 0x2;
     int LOCAL_SET = 0x3;
     int I64_CONST = 0x4;
+    int F64_CONST = 0x5;
 
     int I32_ADD = 0x10;
     int I32_SUB = 0x11;
@@ -16,6 +17,11 @@ public interface Opcodes {
     int I64_SUB = 0x15;
     int I64_MUL = 0x16;
     int I64_DIV = 0x17;
+
+    int F64_ADD = 0x18;
+    int F64_SUB = 0x19;
+    int F64_MUL = 0x1A;
+    int F64_DIV = 0x1B;
 
     int RETURN = 0x20;
     int RETURN_VOID = 0x21;

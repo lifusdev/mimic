@@ -38,6 +38,12 @@ public final class Interpreter implements Opcodes {
                     frame.getStack().push(Value.i32(value));
                 }
 
+                case I64_CONST -> {
+                    final long value = ByteUtils.readI64(insns, pc);
+                    pc += 8;
+                    frame.getStack().push(Value.i64(value));
+                }
+
                 case LOCAL_GET -> {
                     final int idx = insns[pc++] & 0xFF;
                     frame.getStack().push(frame.getLocals().get(idx));

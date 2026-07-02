@@ -13,19 +13,39 @@ class VmTest implements Opcodes {
     @Test
     void test1() {
 
-        final byte[] insns = {
-                (byte) I32_CONST, 0x0, 0x0, 0x0, 0x2, // 2
+        final byte[] insns = {(byte) I32_CONST, 0x0, 0x0, 0x0, 0x2, // 2
                 (byte) I32_CONST, 0x0, 0x0, 0x0, 0x0B, // 11
-                (byte) I32_ADD,
-                (byte) RETURN};
+                (byte) I32_ADD, (byte) RETURN
+        };
 
 
-        final VModule module = new VModule(new VMethod[]{
-                new VMethod(0, 2, 0, insns)
-        });
+        final VModule module = new VModule(new VMethod[]{new VMethod(0, 2, 0, insns)});
 
         final Value result = new Interpreter(module, 0).run();
 
         assertEquals(Value.i32(13), result);
+    }
+
+    @Test
+    void testCall() {
+
+        final byte[] caller = {
+                (byte) CALL, 0x1, // 99
+                (byte) I32_CONST, 0x0, 0x0, 0x0, 0x3, // 3
+                (byte) I32_ADD,
+                (byte) RETURN
+        };
+
+        final byte[] callee = {
+                (byte) I32_CONST, 0x0, 0x0, 0x0, 0x63,
+                (byte) RETURN
+        };
+
+
+        final VModule module = new VModule(new VMethod[]{new VMethod(0, 2, 0, caller), new VMethod(0, 1, 0, callee)});
+
+        final Value result = new Interpreter(module, 0).run();
+
+        assertEquals(Value.i32(102), result);
     }
 }

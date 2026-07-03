@@ -12,21 +12,23 @@ import java.util.Deque;
 public final class Interpreter implements Opcodes {
 
     private final VModule module;
-    private final VMethod method;
 
     private final Deque<Frame> callStack = new ArrayDeque<>();
 
     public Interpreter(VModule module, int methodIdx) {
         this.module = module;
-        this.method = module.method(methodIdx);
 
-        callStack.push(new Frame(method));
+        callStack.push(new Frame(module.method(methodIdx)));
     }
 
     public Value run() {
-        while (callStack.peek().getPc() < callStack.peek().getMethod().insns().length) {
-            final Frame frame = callStack.peek();
+        while (true) {
+            final Frame frame = callStack.element();
             final byte[] insns = frame.getMethod().insns();
+
+            if (frame.getPc() >= insns.length) {
+                break;
+            }
 
             int pc = frame.getPc();
             final byte opc = insns[pc++];
@@ -177,6 +179,24 @@ public final class Interpreter implements Opcodes {
                 case D2I -> frame.getStack().push(Value.i32((int) frame.getStack().pop().asF64()));
                 case D2L -> frame.getStack().push(Value.i64((long) frame.getStack().pop().asF64()));
                 case D2F -> frame.getStack().push(Value.f32((float) frame.getStack().pop().asF64()));
+
+                case I64_CMP -> {
+                    final long b = frame.getStack().pop().asI64();
+                    final long a = frame.getStack().pop().asI64();
+                    frame.getStack().push(Value.i32(Long.compare(a, b)));
+                }
+
+                case F32_CMP -> {
+                    final float b = frame.getStack().pop().asF32();
+                    final float a = frame.getStack().pop().asF32();
+                    frame.getStack().push(Value.i32(Float.compare(a, b)));
+                }
+
+                case F64_CMP -> {
+                    final double b = frame.getStack().pop().asF64();
+                    final double a = frame.getStack().pop().asF64();
+                    frame.getStack().push(Value.i32(Double.compare(a, b)));
+                }
 
                 case I64_ADD -> {
                     final long b = frame.getStack().pop().asI64();

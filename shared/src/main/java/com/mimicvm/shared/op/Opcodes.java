@@ -42,6 +42,10 @@ public interface Opcodes {
     int D2L = 0x5A;
     int D2F = 0x5B;
 
+    int I64_CMP = 0x60;
+    int F32_CMP = 0x61;
+    int F64_CMP = 0x62;
+
     int I64_ADD = 0x14;
     int I64_SUB = 0x15;
     int I64_MUL = 0x16;

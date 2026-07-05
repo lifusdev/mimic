@@ -34,6 +34,14 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
+    public void visitVarInsn(int opc, int index) {
+        switch (opc) {
+            case Opcodes.ILOAD -> assembler.op(LOCAL_GET).u8(index);
+            case Opcodes.ISTORE -> assembler.op(LOCAL_SET).u8(index);
+        }
+    }
+
+    @Override
     public void visitIntInsn(int opc, int operand) {
         if (opc == Opcodes.BIPUSH || opc == Opcodes.SIPUSH) {
             assembler.op(I32_CONST).i32(operand);

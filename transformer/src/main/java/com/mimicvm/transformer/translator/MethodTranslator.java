@@ -30,6 +30,9 @@ public final class MethodTranslator extends MethodVisitor {
             case Opcodes.ISUB -> assembler.op(I32_SUB);
             case Opcodes.IMUL -> assembler.op(I32_MUL);
             case Opcodes.IDIV -> assembler.op(I32_DIV);
+
+            case Opcodes.IRETURN -> assembler.op(RETURN);
+            case Opcodes.RETURN -> assembler.op(RETURN_VOID);
         }
     }
 

@@ -24,6 +24,11 @@ public final class Assembler {
         return this;
     }
 
+    // current write pos
+    public int pos() {
+        return baos.size();
+    }
+
     public byte[] bytes() {
         return baos.toByteArray();
     }

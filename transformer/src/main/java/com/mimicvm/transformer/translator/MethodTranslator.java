@@ -1,9 +1,15 @@
 package com.mimicvm.transformer.translator;
 
+import com.mimicvm.shared.utils.ByteUtils;
 import com.mimicvm.transformer.emit.Assembler;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.mimicvm.shared.op.Opcodes.*;
@@ -13,9 +19,50 @@ public final class MethodTranslator extends MethodVisitor {
     private final Assembler assembler = new Assembler();
     private final Consumer<byte[]> onDone;
 
+    // stores the byte pos of a label
+    private final Map<Label, Integer> labelOffsets = new HashMap<>();
+
+    // https://www.geeksforgeeks.org/compiler-design/backpatching-in-compiler-design/
+    private record Patch(int pos, Label target) {
+    }
+
+    private final List<Patch> patches = new ArrayList<>();
+
     public MethodTranslator(Consumer<byte[]> onDone) {
         super(Opcodes.ASM9);
         this.onDone = onDone;
+    }
+
+    @Override
+    public void visitLabel(Label label) {
+        labelOffsets.put(label, assembler.pos());
+    }
+
+    @Override
+    public void visitJumpInsn(int opc, Label label) {
+        switch (opc) {
+            case Opcodes.GOTO -> assembler.op(JUMP);
+
+            /*
+              First the comparison opcode (pushes 1 or 0 onto the stack)
+              then JUMP_IF
+             */
+            case Opcodes.IF_ICMPEQ -> assembler.op(I32_EQ).op(JUMP_IF);
+            case Opcodes.IF_ICMPNE -> assembler.op(I32_NE).op(JUMP_IF);
+            case Opcodes.IF_ICMPLT -> assembler.op(I32_LT).op(JUMP_IF);
+            case Opcodes.IF_ICMPGE -> assembler.op(I32_GE).op(JUMP_IF);
+            case Opcodes.IF_ICMPGT -> assembler.op(I32_GT).op(JUMP_IF);
+            case Opcodes.IF_ICMPLE -> assembler.op(I32_LE).op(JUMP_IF);
+
+            // not yet supported
+            default -> {
+                return;
+            }
+        }
+
+        // placeholder (4 bytes)
+        patches.add(new Patch(assembler.pos(), label));
+        assembler.i32(0);
     }
 
     @Override
@@ -60,6 +107,14 @@ public final class MethodTranslator extends MethodVisitor {
 
     @Override
     public void visitEnd() {
-        onDone.accept(assembler.bytes());
+        final byte[] code = assembler.bytes();
+
+        // fill placeholder with actual target
+        for (Patch patch : patches) {
+            final int target = labelOffsets.get(patch.target());
+            ByteUtils.writeI32(code, patch.pos(), target);
+        }
+
+        onDone.accept(code);
     }
 }

@@ -16,9 +16,19 @@ public final class Interpreter implements Opcodes {
     private final Deque<Frame> callStack = new ArrayDeque<>();
 
     public Interpreter(VModule module, int methodIdx) {
+        this(module, methodIdx, new Value[0]);
+    }
+
+    public Interpreter(VModule module, int methodIdx, Value... args) {
         this.module = module;
 
-        callStack.push(new Frame(module.method(methodIdx)));
+        final Frame entry = new Frame(module.method(methodIdx));
+        
+        for (int i = 0; i < args.length; i++) {
+            entry.getLocals().set(i, args[i]);
+        }
+
+        callStack.push(entry);
     }
 
     public Value run() {

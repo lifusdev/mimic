@@ -1,0 +1,29 @@
+package com.mimicvm.vm.heap;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A simple heap.
+ * id 0 is reserved for null
+ */
+public final class Heap {
+
+    private final List<VObject> objects = new ArrayList<>();
+
+    public Heap() {
+        objects.add(null);
+    }
+
+    public int alloc(int fieldCount) {
+        objects.add(new VObject(fieldCount));
+        return objects.size() - 1;
+    }
+
+    public VObject get(int id) {
+        if (id == 0) {
+            throw new NullPointerException("null reference");
+        }
+        return objects.get(id);
+    }
+}

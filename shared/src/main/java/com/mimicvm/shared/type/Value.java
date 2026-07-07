@@ -24,6 +24,16 @@ public record Value(Type type, long bits) {
         return new Value(Type.F64, Double.doubleToRawLongBits(data));
     }
 
+    public static Value ref(int id) {
+        return new Value(Type.REF, id);
+    }
+
+    public static final Value NULL = ref(0);
+
+    public int refId() {
+        return (int) bits;
+    }
+
     public int data() {
         return (int) bits;
     }

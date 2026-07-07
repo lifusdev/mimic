@@ -23,6 +23,7 @@ public final class MethodTranslator extends MethodVisitor {
     private final Assembler assembler = new Assembler();
     private final IMethodIdx table;
     private final IFieldIdx fields;
+    private final IFieldIdx statics;
     private final Consumer<VMethod> onDone;
 
     private final int paramCount;
@@ -38,10 +39,11 @@ public final class MethodTranslator extends MethodVisitor {
 
     private final List<Patch> patches = new ArrayList<>();
 
-    public MethodTranslator(IMethodIdx table, IFieldIdx fields, int access, String desc, Consumer<VMethod> onDone) {
+    public MethodTranslator(IMethodIdx table, IFieldIdx fields, IFieldIdx statics, int access, String desc, Consumer<VMethod> onDone) {
         super(Opcodes.ASM9);
         this.table = table;
         this.fields = fields;
+        this.statics = statics;
         this.onDone = onDone;
 
         final boolean isStatic = (access & Opcodes.ACC_STATIC) != 0;
@@ -79,6 +81,9 @@ public final class MethodTranslator extends MethodVisitor {
         switch (opcode) {
             case Opcodes.GETFIELD -> assembler.op(GET_FIELD).u8(fields.indexOf(name, descriptor));
             case Opcodes.PUTFIELD -> assembler.op(PUT_FIELD).u8(fields.indexOf(name, descriptor));
+            
+            case Opcodes.GETSTATIC -> assembler.op(GET_STATIC).u8(statics.indexOf(name, descriptor));
+            case Opcodes.PUTSTATIC -> assembler.op(PUT_STATIC).u8(statics.indexOf(name, descriptor));
         }
     }
 

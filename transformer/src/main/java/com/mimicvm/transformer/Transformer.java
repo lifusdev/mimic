@@ -4,6 +4,7 @@ import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.transformer.translator.ClassTranslator;
 import com.mimicvm.transformer.translator.table.FieldTable;
 import com.mimicvm.transformer.translator.table.MethodTable;
+import com.mimicvm.transformer.translator.table.StaticTable;
 import org.objectweb.asm.ClassReader;
 
 import java.util.ArrayList;
@@ -25,9 +26,10 @@ public final class Transformer {
     public List<VMethod> translate() {
         final MethodTable table = MethodTable.of(bytecode);
         final FieldTable fields = FieldTable.of(bytecode);
+        final StaticTable statics = StaticTable.of(bytecode);
 
         final List<VMethod> methods = new ArrayList<>();
-        reader.accept(new ClassTranslator(table, fields, methods::add), 0);
+        reader.accept(new ClassTranslator(table, fields, statics, methods::add), 0);
         return methods;
     }
 }

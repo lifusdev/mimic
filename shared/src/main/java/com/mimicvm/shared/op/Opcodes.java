@@ -78,6 +78,9 @@ public interface Opcodes {
 
     int SWITCH = 0x78;
 
+    int GET_STATIC = 0x79;
+    int PUT_STATIC = 0x7A;
+
     int I64_ADD = 0x14;
     int I64_SUB = 0x15;
     int I64_MUL = 0x16;

@@ -10,6 +10,8 @@ import com.mimicvm.vm.heap.Heap;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class Interpreter implements Opcodes {
 
@@ -17,6 +19,8 @@ public final class Interpreter implements Opcodes {
 
     private final Deque<Frame> callStack = new ArrayDeque<>();
     private final Heap heap = new Heap();
+
+    private final Map<Integer, Value> statics = new HashMap<>();
 
     public Interpreter(VModule module, int methodIdx) {
         this(module, methodIdx, new Value[0]);
@@ -455,6 +459,10 @@ public final class Interpreter implements Opcodes {
                     final int ref = frame.stack().pop().refId();
                     frame.stack().push(Value.i32(heap.get(ref).len()));
                 }
+
+                case GET_STATIC -> frame.stack().push(statics.get(cursor.nextU8()));
+
+                case PUT_STATIC -> statics.put(cursor.nextU8(), frame.stack().pop());
 
                 case GET_FIELD -> {
                     final int idx = cursor.nextU8();

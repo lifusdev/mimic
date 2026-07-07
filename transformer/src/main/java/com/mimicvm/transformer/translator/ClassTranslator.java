@@ -23,11 +23,11 @@ public final class ClassTranslator extends ClassVisitor {
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] ex) {
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         if (name.equals("<init>") || name.equals("<clinit>")) {
             return null;
         }
 
-        return new MethodTranslator(table, fields, access, desc, onMethod);
+        return new MethodTranslator(table, fields, access, descriptor, onMethod);
     }
 }

@@ -71,6 +71,9 @@ public interface Opcodes {
     int GET_FIELD = 0x71;
     int PUT_FIELD = 0x72;
     int ACONST_NULL = 0x73;
+    int NEW_ARRAY = 0x74;
+    int ARRAY_GET = 0x75;
+    int ARRAY_SET = 0x76;
 
     int I64_ADD = 0x14;
     int I64_SUB = 0x15;

@@ -10,11 +10,11 @@ public final class Locals {
         this.slots = new Value[max];
     }
 
-    public Value get(int index) {
-        return slots[index];
+    public Value get(int idx) {
+        return slots[idx];
     }
 
-    public void set(int index, Value value) {
-        slots[index] = value;
+    public void set(int idx, Value value) {
+        slots[idx] = value;
     }
 }

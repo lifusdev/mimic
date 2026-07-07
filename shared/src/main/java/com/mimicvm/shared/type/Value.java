@@ -34,7 +34,7 @@ public record Value(Type type, long bits) {
         return (int) bits;
     }
 
-    public int data() {
+    public int asI32() {
         return (int) bits;
     }
 

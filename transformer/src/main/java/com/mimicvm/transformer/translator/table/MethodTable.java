@@ -34,12 +34,12 @@ public final class MethodTable extends ClassVisitor implements IMethodIdx {
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] ex) {
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         if (name.equals("<init>") || name.equals("<clinit>")) {
             return null;
         }
 
-        indices.put(key(name, desc), nextIdx++);
+        indices.put(key(name, descriptor), nextIdx++);
 
         return null;
     }

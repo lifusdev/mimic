@@ -33,13 +33,13 @@ public final class FieldTable extends ClassVisitor implements IFieldIdx {
     }
 
     @Override
-    public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
         // static fields do not belong to the obj
         if ((access & Opcodes.ACC_STATIC) != 0) {
             return null;
         }
 
-        indices.put(key(name, desc), nextIdx++);
+        indices.put(key(name, descriptor), nextIdx++);
         return null;
     }
 

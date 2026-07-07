@@ -59,26 +59,26 @@ public final class Interpreter implements Opcodes {
                 case LOCAL_SET -> frame.locals().set(cursor.nextU8(), frame.stack().pop());
 
                 case I32_ADD -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a + b));
                 }
 
                 case I32_SUB -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a - b));
                 }
 
                 case I32_MUL -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a * b));
                 }
 
                 case I32_DIV -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
 
                     if (b == 0) {
                         throw new ArithmeticException("Division by zero");
@@ -88,8 +88,8 @@ public final class Interpreter implements Opcodes {
                 }
 
                 case I32_MOD -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
 
                     if (b == 0) {
                         throw new ArithmeticException("Division by zero");
@@ -99,43 +99,43 @@ public final class Interpreter implements Opcodes {
                 }
 
                 case I32_NEG -> {
-                    final int a = frame.stack().pop().data();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(-a));
                 }
 
                 case I32_AND -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a & b));
                 }
 
                 case I32_OR -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a | b));
                 }
 
                 case I32_XOR -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a ^ b));
                 }
 
                 case I32_SHL -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a << b));
                 }
 
                 case I32_SHR -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a >> b));
                 }
 
                 case I32_USHR -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a >>> b));
                 }
 
@@ -154,9 +154,9 @@ public final class Interpreter implements Opcodes {
                     frame.stack().push(b);
                 }
 
-                case I2L -> frame.stack().push(Value.i64(frame.stack().pop().data()));
-                case I2F -> frame.stack().push(Value.f32(frame.stack().pop().data()));
-                case I2D -> frame.stack().push(Value.f64(frame.stack().pop().data()));
+                case I2L -> frame.stack().push(Value.i64(frame.stack().pop().asI32()));
+                case I2F -> frame.stack().push(Value.f32(frame.stack().pop().asI32()));
+                case I2D -> frame.stack().push(Value.f64(frame.stack().pop().asI32()));
 
                 case L2I -> frame.stack().push(Value.i32((int) frame.stack().pop().asI64()));
                 case L2F -> frame.stack().push(Value.f32((float) frame.stack().pop().asI64()));
@@ -170,9 +170,9 @@ public final class Interpreter implements Opcodes {
                 case D2L -> frame.stack().push(Value.i64((long) frame.stack().pop().asF64()));
                 case D2F -> frame.stack().push(Value.f32((float) frame.stack().pop().asF64()));
 
-                case I2B -> frame.stack().push(Value.i32((byte) frame.stack().pop().data()));
-                case I2C -> frame.stack().push(Value.i32((char) frame.stack().pop().data()));
-                case I2S -> frame.stack().push(Value.i32((short) frame.stack().pop().data()));
+                case I2B -> frame.stack().push(Value.i32((byte) frame.stack().pop().asI32()));
+                case I2C -> frame.stack().push(Value.i32((char) frame.stack().pop().asI32()));
+                case I2S -> frame.stack().push(Value.i32((short) frame.stack().pop().asI32()));
 
                 case I64_CMP -> {
                     final long b = frame.stack().pop().asI64();
@@ -253,19 +253,19 @@ public final class Interpreter implements Opcodes {
                 }
 
                 case I64_SHL -> {
-                    final int b = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
                     final long a = frame.stack().pop().asI64();
                     frame.stack().push(Value.i64(a << b));
                 }
 
                 case I64_SHR -> {
-                    final int b = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
                     final long a = frame.stack().pop().asI64();
                     frame.stack().push(Value.i64(a >> b));
                 }
 
                 case I64_USHR -> {
-                    final int b = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
                     final long a = frame.stack().pop().asI64();
                     frame.stack().push(Value.i64(a >>> b));
                 }
@@ -350,44 +350,44 @@ public final class Interpreter implements Opcodes {
                 case JUMP_IF -> {
                     final int target = cursor.nextI32();
 
-                    if (frame.stack().pop().data() != 0) {
+                    if (frame.stack().pop().asI32() != 0) {
                         cursor.seek(target);
                     }
                 }
 
                 case I32_EQ -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a == b ? 1 : 0));
                 }
 
                 case I32_LT -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a < b ? 1 : 0));
                 }
 
                 case I32_GT -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a > b ? 1 : 0));
                 }
 
                 case I32_LE -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a <= b ? 1 : 0));
                 }
 
                 case I32_GE -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a >= b ? 1 : 0));
                 }
 
                 case I32_NE -> {
-                    final int b = frame.stack().pop().data();
-                    final int a = frame.stack().pop().data();
+                    final int b = frame.stack().pop().asI32();
+                    final int a = frame.stack().pop().asI32();
                     frame.stack().push(Value.i32(a != b ? 1 : 0));
                 }
 
@@ -409,10 +409,28 @@ public final class Interpreter implements Opcodes {
                         return null;
                     }
                 }
-                
+
                 case ACONST_NULL -> frame.stack().push(Value.NULL);
 
                 case NEW -> frame.stack().push(Value.ref(heap.alloc(cursor.nextU8())));
+
+                case NEW_ARRAY -> {
+                    final int len = frame.stack().pop().asI32();
+                    frame.stack().push(Value.ref(heap.alloc(len)));
+                }
+
+                case ARRAY_GET -> {
+                    final int idx = frame.stack().pop().asI32();
+                    final int ref = frame.stack().pop().refId();
+                    frame.stack().push(heap.get(ref).field(idx));
+                }
+
+                case ARRAY_SET -> {
+                    final Value value = frame.stack().pop();
+                    final int idx = frame.stack().pop().asI32();
+                    final int ref = frame.stack().pop().refId();
+                    heap.get(ref).field(idx, value);
+                }
 
                 case GET_FIELD -> {
                     final int idx = cursor.nextU8();

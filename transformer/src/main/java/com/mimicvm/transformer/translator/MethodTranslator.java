@@ -55,9 +55,9 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(int opc, String owner, String name, String desc, boolean isInterface) {
-        if (opc == Opcodes.INVOKESTATIC) {
-            final int idx = table.indexOf(name, desc);
+    public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+        if (opcode == Opcodes.INVOKESTATIC) {
+            final int idx = table.indexOf(name, descriptor);
 
             // not yet supported
             if (idx >= 0) {
@@ -67,18 +67,18 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(int opc, String type) {
+    public void visitTypeInsn(int opcode, String type) {
         // NEW with field count
-        if (opc == Opcodes.NEW) {
+        if (opcode == Opcodes.NEW) {
             assembler.op(NEW).u8(fields.fieldCount());
         }
     }
 
     @Override
-    public void visitFieldInsn(int opc, String owner, String name, String desc) {
-        switch (opc) {
-            case Opcodes.GETFIELD -> assembler.op(GET_FIELD).u8(fields.indexOf(name, desc));
-            case Opcodes.PUTFIELD -> assembler.op(PUT_FIELD).u8(fields.indexOf(name, desc));
+    public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+        switch (opcode) {
+            case Opcodes.GETFIELD -> assembler.op(GET_FIELD).u8(fields.indexOf(name, descriptor));
+            case Opcodes.PUTFIELD -> assembler.op(PUT_FIELD).u8(fields.indexOf(name, descriptor));
         }
     }
 
@@ -88,8 +88,8 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
-    public void visitJumpInsn(int opc, Label label) {
-        switch (opc) {
+    public void visitJumpInsn(int opcode, Label label) {
+        switch (opcode) {
             case Opcodes.GOTO -> assembler.op(JUMP);
 
             /*
@@ -126,46 +126,49 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
-    public void visitInsn(int opc) {
-        if (opc >= Opcodes.ICONST_M1 && opc <= Opcodes.ICONST_5) {
-            assembler.op(I32_CONST).i32(opc - Opcodes.ICONST_0);
+    public void visitInsn(int opcode) {
+        if (opcode >= Opcodes.ICONST_M1 && opcode <= Opcodes.ICONST_5) {
+            assembler.op(I32_CONST).i32(opcode - Opcodes.ICONST_0);
             return;
         }
 
-        if (opc == Opcodes.LCONST_0) {
+        if (opcode == Opcodes.LCONST_0) {
             assembler.op(I64_CONST).i64(0);
             return;
         }
-        if (opc == Opcodes.LCONST_1) {
+        if (opcode == Opcodes.LCONST_1) {
             assembler.op(I64_CONST).i64(1);
             return;
         }
 
-        if (opc == Opcodes.FCONST_0) {
+        if (opcode == Opcodes.FCONST_0) {
             assembler.op(F32_CONST).i32(Float.floatToRawIntBits(0f));
             return;
         }
-        if (opc == Opcodes.FCONST_1) {
+        if (opcode == Opcodes.FCONST_1) {
             assembler.op(F32_CONST).i32(Float.floatToRawIntBits(1f));
             return;
         }
-        if (opc == Opcodes.FCONST_2) {
+        if (opcode == Opcodes.FCONST_2) {
             assembler.op(F32_CONST).i32(Float.floatToRawIntBits(2f));
             return;
         }
 
-        if (opc == Opcodes.DCONST_0) {
+        if (opcode == Opcodes.DCONST_0) {
             assembler.op(F64_CONST).i64(Double.doubleToRawLongBits(0.0));
             return;
         }
-        if (opc == Opcodes.DCONST_1) {
+        if (opcode == Opcodes.DCONST_1) {
             assembler.op(F64_CONST).i64(Double.doubleToRawLongBits(1.0));
             return;
         }
 
-        switch (opc) {
-            case Opcodes.ACONST_NULL -> assembler.op(ACONST_NULL);
+        if (opcode == Opcodes.ACONST_NULL) {
+            assembler.op(ACONST_NULL);
+            return;
+        }
 
+        switch (opcode) {
             case Opcodes.IADD -> assembler.op(I32_ADD);
             case Opcodes.ISUB -> assembler.op(I32_SUB);
             case Opcodes.IMUL -> assembler.op(I32_MUL);
@@ -226,6 +229,14 @@ public final class MethodTranslator extends MethodVisitor {
             case Opcodes.I2C -> assembler.op(I2C);
             case Opcodes.I2S -> assembler.op(I2S);
 
+            // all array load variants become ARRAY_GET
+            case Opcodes.IALOAD, Opcodes.LALOAD, Opcodes.FALOAD, Opcodes.DALOAD, Opcodes.AALOAD, Opcodes.BALOAD,
+                 Opcodes.CALOAD, Opcodes.SALOAD -> assembler.op(ARRAY_GET);
+
+            // all array store variants to array_set
+            case Opcodes.IASTORE, Opcodes.LASTORE, Opcodes.FASTORE, Opcodes.DASTORE, Opcodes.AASTORE, Opcodes.BASTORE,
+                 Opcodes.CASTORE, Opcodes.SASTORE -> assembler.op(ARRAY_SET);
+
             case Opcodes.DUP -> assembler.op(DUP);
             case Opcodes.POP -> assembler.op(POP);
             case Opcodes.SWAP -> assembler.op(SWAP);
@@ -236,25 +247,30 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
-    public void visitIincInsn(int index, int increment) {
-        assembler.op(LOCAL_GET).u8(index);
+    public void visitIincInsn(int varIndex, int increment) {
+        assembler.op(LOCAL_GET).u8(varIndex);
         assembler.op(I32_CONST).i32(increment);
         assembler.op(I32_ADD);
-        assembler.op(LOCAL_SET).u8(index);
+        assembler.op(LOCAL_SET).u8(varIndex);
     }
 
     @Override
-    public void visitVarInsn(int opc, int index) {
-        switch (opc) {
-            case Opcodes.ILOAD, Opcodes.LLOAD, Opcodes.FLOAD, Opcodes.DLOAD -> assembler.op(LOCAL_GET).u8(index);
-            case Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE -> assembler.op(LOCAL_SET).u8(index);
+    public void visitVarInsn(int opcode, int varIndex) {
+        switch (opcode) {
+            case Opcodes.ILOAD, Opcodes.LLOAD, Opcodes.FLOAD, Opcodes.DLOAD -> assembler.op(LOCAL_GET).u8(varIndex);
+            case Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE -> assembler.op(LOCAL_SET).u8(varIndex);
         }
     }
 
     @Override
-    public void visitIntInsn(int opc, int operand) {
-        if (opc == Opcodes.BIPUSH || opc == Opcodes.SIPUSH) {
+    public void visitIntInsn(int opcode, int operand) {
+        if (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH) {
             assembler.op(I32_CONST).i32(operand);
+        }
+
+        //TODO
+        if (opcode == Opcodes.NEWARRAY) {
+            assembler.op(NEW_ARRAY);
         }
     }
 

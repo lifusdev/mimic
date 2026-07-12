@@ -58,7 +58,7 @@ public final class MethodTranslator extends MethodVisitor {
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-        if (opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.INVOKESPECIAL || opcode == Opcodes.INVOKEVIRTUAL) {
+        if (opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.INVOKESPECIAL || opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE) {
             final int idx = table.indexOf(name, descriptor);
 
             if (idx >= 0) {
@@ -72,6 +72,10 @@ public final class MethodTranslator extends MethodVisitor {
         // NEW with field count
         if (opcode == Opcodes.NEW) {
             assembler.op(NEW).u8(fields.fieldCount());
+        }
+        
+        if (opcode == Opcodes.ANEWARRAY) {
+            assembler.op(NEW_ARRAY);
         }
     }
 

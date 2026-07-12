@@ -2,8 +2,9 @@ package com.mimicvm.shared.code;
 
 /**
  * @param typeNames all type names referenced in the module
+ * @param constants constant pool
  */
-public record VModule(String[] typeNames, VMethod[] methods) {
+public record VModule(String[] typeNames, String[] constants, VMethod[] methods) {
 
     public VModule {
         if (methods == null) {
@@ -12,10 +13,17 @@ public record VModule(String[] typeNames, VMethod[] methods) {
         if (typeNames == null) {
             typeNames = new String[0];
         }
+        if (constants == null) {
+            constants = new String[0];
+        }
+    }
+
+    public VModule(String[] typeNames, VMethod[] methods) {
+        this(typeNames, new String[0], methods);
     }
 
     public VModule(VMethod[] methods) {
-        this(new String[0], methods);
+        this(new String[0], new String[0], methods);
     }
 
     public VMethod method(int idx) {
@@ -24,5 +32,9 @@ public record VModule(String[] typeNames, VMethod[] methods) {
 
     public String typeName(int idx) {
         return typeNames[idx];
+    }
+
+    public String constant(int idx) {
+        return constants[idx];
     }
 }

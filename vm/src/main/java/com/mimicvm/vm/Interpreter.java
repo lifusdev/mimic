@@ -21,6 +21,7 @@ public final class Interpreter implements Opcodes {
     private final Heap heap = new Heap();
 
     private final Map<Integer, Value> statics = new HashMap<>();
+    private final Map<Integer, String> stringObjs = new HashMap<>();
 
     public Interpreter(VModule module, int methodIdx) {
         this(module, methodIdx, new Value[0]);
@@ -431,6 +432,19 @@ public final class Interpreter implements Opcodes {
                     if (callStack.isEmpty()) {
                         return null;
                     }
+                }
+
+                case ATHROW -> {
+                    final Value exRef = frame.stack().pop();
+                    throw new RuntimeException("ATHROW: exception obj ref=" + exRef.refId());
+                }
+
+                case STRING_CONST -> {
+                    final int poolIdx = cursor.nextU8();
+                    final String str = module.constant(poolIdx);
+                    final int ref = heap.alloc(0); // string has 0 instance fields
+                    stringObjs.put(ref, str);
+                    frame.stack().push(Value.ref(ref));
                 }
 
                 case ACONST_NULL -> frame.stack().push(Value.NULL);

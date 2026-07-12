@@ -81,6 +81,8 @@ public interface Opcodes {
     int GET_STATIC = 0x79;
     int PUT_STATIC = 0x7A;
     int INSTANCEOF = 0x7B;
+    int ATHROW = 0x7C;
+    int STRING_CONST = 0x7D; //LDC
 
     int I64_ADD = 0x14;
     int I64_SUB = 0x15;

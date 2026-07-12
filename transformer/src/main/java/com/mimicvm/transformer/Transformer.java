@@ -2,10 +2,7 @@ package com.mimicvm.transformer;
 
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.transformer.translator.ClassTranslator;
-import com.mimicvm.transformer.translator.table.FieldTable;
-import com.mimicvm.transformer.translator.table.MethodTable;
-import com.mimicvm.transformer.translator.table.StaticTable;
-import com.mimicvm.transformer.translator.table.TypeTable;
+import com.mimicvm.transformer.translator.table.*;
 import org.objectweb.asm.ClassReader;
 
 import java.util.ArrayList;
@@ -19,6 +16,7 @@ public final class Transformer {
     private final byte[] bytecode;
     private final ClassReader reader;
     private TypeTable typeTable;
+    private final ConstantPool stringPool = new ConstantPool();
 
     public Transformer(byte[] bytecode) {
         this.bytecode = bytecode;
@@ -35,7 +33,7 @@ public final class Transformer {
         }
 
         final List<VMethod> methods = new ArrayList<>();
-        reader.accept(new ClassTranslator(table, fields, statics, typeTable, methods::add), 0);
+        reader.accept(new ClassTranslator(table, fields, statics, typeTable, stringPool, methods::add), 0);
         return methods;
     }
 
@@ -44,5 +42,9 @@ public final class Transformer {
             typeTable = TypeTable.of(bytecode);
         }
         return typeTable.typeNames();
+    }
+
+    public String[] stringConstants() {
+        return stringPool.toArray();
     }
 }

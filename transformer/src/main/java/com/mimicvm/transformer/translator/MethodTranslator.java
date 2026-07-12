@@ -4,6 +4,7 @@ import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.shared.utils.ByteUtils;
 import com.mimicvm.shared.utils.DescUtils;
 import com.mimicvm.transformer.emit.Assembler;
+import com.mimicvm.transformer.translator.table.ConstantPool;
 import com.mimicvm.transformer.translator.table.IFieldIdx;
 import com.mimicvm.transformer.translator.table.IMethodIdx;
 import com.mimicvm.transformer.translator.table.ITypeIdx;
@@ -26,6 +27,7 @@ public final class MethodTranslator extends MethodVisitor {
     private final IFieldIdx fields;
     private final IFieldIdx statics;
     private final ITypeIdx types;
+    private final ConstantPool strings;
     private final Consumer<VMethod> onDone;
 
     private final int paramCount;
@@ -41,12 +43,13 @@ public final class MethodTranslator extends MethodVisitor {
 
     private final List<Patch> patches = new ArrayList<>();
 
-    public MethodTranslator(IMethodIdx table, IFieldIdx fields, IFieldIdx statics, ITypeIdx types, int access, String desc, Consumer<VMethod> onDone) {
+    public MethodTranslator(IMethodIdx table, IFieldIdx fields, IFieldIdx statics, ITypeIdx types, ConstantPool strings, int access, String desc, Consumer<VMethod> onDone) {
         super(Opcodes.ASM9);
         this.table = table;
         this.fields = fields;
         this.statics = statics;
         this.types = types;
+        this.strings = strings;
         this.onDone = onDone;
 
         final boolean isStatic = (access & Opcodes.ACC_STATIC) != 0;
@@ -307,6 +310,8 @@ public final class MethodTranslator extends MethodVisitor {
             case Opcodes.IRETURN, Opcodes.LRETURN, Opcodes.FRETURN, Opcodes.DRETURN, Opcodes.ARETURN ->
                     assembler.op(RETURN);
             case Opcodes.RETURN -> assembler.op(RETURN_VOID);
+
+            case Opcodes.ATHROW -> assembler.op(ATHROW);
         }
     }
 
@@ -350,6 +355,8 @@ public final class MethodTranslator extends MethodVisitor {
             assembler.op(F32_CONST).i32(Float.floatToRawIntBits(f));
         } else if (value instanceof Double d) {
             assembler.op(F64_CONST).i64(Double.doubleToRawLongBits(d));
+        } else if (value instanceof String s) {
+            assembler.op(STRING_CONST).u8(strings.indexOf(s));
         }
     }
 

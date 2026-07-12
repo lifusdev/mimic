@@ -81,7 +81,7 @@ public final class MethodTranslator extends MethodVisitor {
         switch (opcode) {
             case Opcodes.GETFIELD -> assembler.op(GET_FIELD).u8(fields.indexOf(name, descriptor));
             case Opcodes.PUTFIELD -> assembler.op(PUT_FIELD).u8(fields.indexOf(name, descriptor));
-            
+
             case Opcodes.GETSTATIC -> assembler.op(GET_STATIC).u8(statics.indexOf(name, descriptor));
             case Opcodes.PUTSTATIC -> assembler.op(PUT_STATIC).u8(statics.indexOf(name, descriptor));
         }
@@ -307,8 +307,10 @@ public final class MethodTranslator extends MethodVisitor {
     @Override
     public void visitVarInsn(int opcode, int varIndex) {
         switch (opcode) {
-            case Opcodes.ILOAD, Opcodes.LLOAD, Opcodes.FLOAD, Opcodes.DLOAD -> assembler.op(LOCAL_GET).u8(varIndex);
-            case Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE -> assembler.op(LOCAL_SET).u8(varIndex);
+            case Opcodes.ILOAD, Opcodes.LLOAD, Opcodes.FLOAD, Opcodes.DLOAD, Opcodes.ALOAD ->
+                    assembler.op(LOCAL_GET).u8(varIndex);
+            case Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE, Opcodes.ASTORE ->
+                    assembler.op(LOCAL_SET).u8(varIndex);
         }
     }
 

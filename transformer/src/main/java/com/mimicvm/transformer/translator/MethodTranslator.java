@@ -58,7 +58,7 @@ public final class MethodTranslator extends MethodVisitor {
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-        if (opcode == Opcodes.INVOKESTATIC) {
+        if (opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.INVOKESPECIAL) {
             final int idx = table.indexOf(name, descriptor);
 
             // not yet supported

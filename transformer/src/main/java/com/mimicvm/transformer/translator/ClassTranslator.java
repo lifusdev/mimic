@@ -26,7 +26,7 @@ public final class ClassTranslator extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (name.equals("<init>") || name.equals("<clinit>")) {
+        if (name.equals("<clinit>")) {
             return null;
         }
 

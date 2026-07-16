@@ -503,7 +503,8 @@ public final class Interpreter implements Opcodes {
                 case INSTANCEOF -> {
                     final int typeIdx = cursor.nextU8();
                     final int ref = frame.stack().pop().refId();
-                    frame.stack().push(Value.i32(heap.get(ref).typeIdx() == typeIdx ? 1 : 0));
+                    final boolean matches = ref != 0 && heap.get(ref).typeIdx() == typeIdx;
+                    frame.stack().push(Value.i32(matches ? 1 : 0));
                 }
 
                 case CHECKCAST -> {

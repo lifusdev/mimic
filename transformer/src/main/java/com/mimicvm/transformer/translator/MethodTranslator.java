@@ -341,7 +341,18 @@ public final class MethodTranslator extends MethodVisitor {
 
         //TODO
         if (opcode == Opcodes.NEWARRAY) {
-            assembler.op(NEW_ARRAY).u8(0xFF);
+            final String type = switch (operand) {
+                case Opcodes.T_BOOLEAN -> "[Z";
+                case Opcodes.T_CHAR -> "[C";
+                case Opcodes.T_FLOAT -> "[F";
+                case Opcodes.T_DOUBLE -> "[D";
+                case Opcodes.T_BYTE -> "[B";
+                case Opcodes.T_SHORT -> "[S";
+                case Opcodes.T_INT -> "[I";
+                case Opcodes.T_LONG -> "[J";
+                default -> throw new IllegalArgumentException("bad array type: " + operand);
+            };
+            assembler.op(NEW_ARRAY).u8(types.indexOf(type));
         }
     }
 

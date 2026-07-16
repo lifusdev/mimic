@@ -11,6 +11,7 @@ import com.mimicvm.transformer.translator.table.ITypeIdx;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,7 +81,8 @@ public final class MethodTranslator extends MethodVisitor {
         }
 
         if (opcode == Opcodes.ANEWARRAY) {
-            assembler.op(NEW_ARRAY).u8(types.indexOf(type));
+            final String arrayType = "[" + Type.getObjectType(type).getDescriptor();
+            assembler.op(NEW_ARRAY).u8(types.indexOf(arrayType));
         }
 
         if (opcode == Opcodes.CHECKCAST) {

@@ -1,13 +1,12 @@
 package com.mimicvm.transformer.translator;
 
+import com.mimicvm.annotations.VirtualizeMe;
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.transformer.translator.table.ConstantPool;
 import com.mimicvm.transformer.translator.table.IFieldIdx;
 import com.mimicvm.transformer.translator.table.IMethodIdx;
 import com.mimicvm.transformer.translator.table.ITypeIdx;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 
 import java.util.function.Consumer;
 
@@ -36,6 +35,15 @@ public final class ClassTranslator extends ClassVisitor {
             return null;
         }
 
-        return new MethodTranslator(table, fields, statics, types, strings, access, descriptor, onMethod);
+        return new MethodVisitor(Opcodes.ASM9) {
+            @Override
+            public AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                if (annotationDescriptor.equals(Type.getDescriptor(VirtualizeMe.class))) {
+                    mv = new MethodTranslator(table, fields, statics, types, strings, access, descriptor, onMethod);
+                }
+
+                return super.visitAnnotation(annotationDescriptor, visible);
+            }
+        };
     }
 }

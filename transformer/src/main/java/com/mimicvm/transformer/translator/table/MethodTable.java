@@ -1,9 +1,7 @@
 package com.mimicvm.transformer.translator.table;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import com.mimicvm.annotations.VirtualizeMe;
+import org.objectweb.asm.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +37,16 @@ public final class MethodTable extends ClassVisitor implements IMethodIdx {
             return null;
         }
 
+        return new MethodVisitor(Opcodes.ASM9) {
+            @Override
+            public AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                if (annotationDescriptor.equals(Type.getDescriptor(VirtualizeMe.class))) {
+                    indices.put(key(name, descriptor), nextIdx++);
+                }
 
-        indices.put(key(name, descriptor), nextIdx++);
-
-        return null;
+                return super.visitAnnotation(annotationDescriptor, visible);
+            }
+        };
     }
 
     @Override

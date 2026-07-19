@@ -2,6 +2,8 @@ package com.mimicvm.vm.heap;
 
 import com.mimicvm.shared.type.Value;
 
+import java.util.Arrays;
+
 /**
  * An object on the heap.
  */
@@ -17,6 +19,12 @@ public final class VObject {
     public VObject(int fieldCount, int typeIdx) {
         this.fields = new Value[fieldCount];
         this.typeIdx = typeIdx;
+    }
+
+    public VObject(int fieldCount, int typeIdx, Value initVal) {
+        this(fieldCount, typeIdx);
+
+        Arrays.fill(fields, initVal);
     }
 
     // read field

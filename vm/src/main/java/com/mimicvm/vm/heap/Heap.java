@@ -1,5 +1,7 @@
 package com.mimicvm.vm.heap;
 
+import com.mimicvm.shared.type.Value;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,11 @@ public final class Heap {
 
     public int alloc(int fieldCount, int typeIdx) {
         objects.add(new VObject(fieldCount, typeIdx));
+        return objects.size() - 1;
+    }
+
+    public int allocArray(int len, int typeIdx, Value initialValue) {
+        objects.add(new VObject(len, typeIdx, initialValue));
         return objects.size() - 1;
     }
 

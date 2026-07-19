@@ -3,7 +3,9 @@ package com.mimicvm.vm;
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.shared.code.VModule;
 import com.mimicvm.shared.op.Opcodes;
+import com.mimicvm.shared.type.Type;
 import com.mimicvm.shared.type.Value;
+import com.mimicvm.shared.utils.DescUtils;
 import com.mimicvm.vm.frame.Cursor;
 import com.mimicvm.vm.frame.Frame;
 import com.mimicvm.vm.heap.Heap;
@@ -563,7 +565,9 @@ public final class Interpreter implements Opcodes {
                     if (typeIdx == 0xFF) {
                         frame.stack().push(Value.ref(heap.alloc(len))); //untyped
                     } else {
-                        frame.stack().push(Value.ref(heap.alloc(len, typeIdx)));
+                        final Type elementType = DescUtils.arrElementType(module.typeName(typeIdx));
+                        final Value initialValue = elementType.defaultValue();
+                        frame.stack().push(Value.ref(heap.allocArray(len, typeIdx, initialValue)));
                     }
                 }
 

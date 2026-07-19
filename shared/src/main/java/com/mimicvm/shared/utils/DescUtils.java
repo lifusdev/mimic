@@ -1,5 +1,7 @@
 package com.mimicvm.shared.utils;
 
+import com.mimicvm.shared.type.Type;
+
 public final class DescUtils {
 
     private DescUtils() {
@@ -29,5 +31,21 @@ public final class DescUtils {
         }
 
         return count;
+    }
+
+    public static Type arrElementType(String desc) {
+        if (desc == null || desc.length() < 2 || desc.charAt(0) != '[') {
+            throw new IllegalArgumentException("bad array descriptor: " + desc);
+        }
+
+        //element type
+        return switch (desc.charAt(1)) {
+            case 'Z', 'B', 'C', 'S', 'I' -> Type.I32;
+            case 'J' -> Type.I64;
+            case 'F' -> Type.F32;
+            case 'D' -> Type.F64;
+            case 'L', '[' -> Type.REF;
+            default -> throw new IllegalArgumentException("bad array descriptor: " + desc);
+        };
     }
 }

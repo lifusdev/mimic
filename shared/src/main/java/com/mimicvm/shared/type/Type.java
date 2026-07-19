@@ -6,5 +6,9 @@ public enum Type {
     F32,
     F64,
     REF,
-    VOID
+    VOID;
+
+    public boolean isWide() {
+        return this == I64 || this == F64;
+    }
 }

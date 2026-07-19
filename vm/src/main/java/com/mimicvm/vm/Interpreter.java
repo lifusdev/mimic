@@ -150,6 +150,30 @@ public final class Interpreter implements Opcodes {
                     frame.stack().push(top);
                 }
 
+                case DUP_X1 -> {
+                    final Value top = frame.stack().pop();
+                    final Value below = frame.stack().pop();
+                    frame.stack().push(top);
+                    frame.stack().push(below);
+                    frame.stack().push(top);
+                }
+
+                case DUP2 -> {
+                    final Value top = frame.stack().pop();
+
+                    if (top.type().isWide()) {
+                        // already takes two jvm slots
+                        frame.stack().push(top);
+                        frame.stack().push(top);
+                    } else {
+                        final Value below = frame.stack().pop();
+                        frame.stack().push(below);
+                        frame.stack().push(top);
+                        frame.stack().push(below);
+                        frame.stack().push(top);
+                    }
+                }
+
                 case POP -> frame.stack().pop();
 
                 case SWAP -> {

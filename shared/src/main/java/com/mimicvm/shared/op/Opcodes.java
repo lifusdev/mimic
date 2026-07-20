@@ -74,6 +74,7 @@ public interface Opcodes {
     int F64_NEG = 0x6C;
     int F32_REM = 0x6D;
     int F64_REM = 0x6E;
+    int MULTI_NEW_ARRAY = 0x6F;
 
     int NEW = 0x70;
     int GET_FIELD = 0x71;

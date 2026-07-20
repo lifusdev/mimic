@@ -95,6 +95,16 @@ public final class MethodTranslator extends MethodVisitor {
     }
 
     @Override
+    public void visitMultiANewArrayInsn(String descriptor, int dimensions) {
+        assembler.op(MULTI_NEW_ARRAY).u8(dimensions);
+
+        // each requires its own type
+        for (int i = 0; i < dimensions; i++) {
+            assembler.u8(types.indexOf(descriptor.substring(i)));
+        }
+    }
+
+    @Override
     public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
         switch (opcode) {
             case Opcodes.GETFIELD -> assembler.op(GET_FIELD).u8(fields.indexOf(name, descriptor));

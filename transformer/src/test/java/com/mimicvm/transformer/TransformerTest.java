@@ -53,8 +53,69 @@ import static org.objectweb.asm.Opcodes.*;
 //    }
 //}
 
+//class Array {
+//    @VirtualizeMe
+//    public static int a() {
+//        int[][] arr = new int[2][3];
+//        return arr[1].length + arr[0][2];
+//    }
+//}
+
 
 class TransformerTest {
+
+    @Test
+    void arrayTest() {
+        ClassWriter classWriter = new ClassWriter(0);
+        MethodVisitor methodVisitor;
+        AnnotationVisitor annotationVisitor0;
+
+        classWriter.visit(V21, ACC_SUPER, "com/mimicvm/transformer/Array", null, "java/lang/Object", null);
+
+        {
+            methodVisitor = classWriter.visitMethod(0, "<init>", "()V", null, null);
+            methodVisitor.visitCode();
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            methodVisitor.visitInsn(RETURN);
+            methodVisitor.visitMaxs(1, 1);
+            methodVisitor.visitEnd();
+        }
+        {
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "a", "()I", null, null);
+            {
+                annotationVisitor0 = methodVisitor.visitAnnotation("Lcom/mimicvm/annotations/VirtualizeMe;", false);
+                annotationVisitor0.visitEnd();
+            }
+            methodVisitor.visitCode();
+            methodVisitor.visitInsn(ICONST_2);
+            methodVisitor.visitInsn(ICONST_3);
+            methodVisitor.visitMultiANewArrayInsn("[[I", 2);
+            methodVisitor.visitVarInsn(ASTORE, 0);
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitInsn(ICONST_1);
+            methodVisitor.visitInsn(AALOAD);
+            methodVisitor.visitInsn(ARRAYLENGTH);
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitInsn(ICONST_0);
+            methodVisitor.visitInsn(AALOAD);
+            methodVisitor.visitInsn(ICONST_2);
+            methodVisitor.visitInsn(IALOAD);
+            methodVisitor.visitInsn(IADD);
+            methodVisitor.visitInsn(IRETURN);
+            methodVisitor.visitMaxs(3, 1);
+            methodVisitor.visitEnd();
+        }
+        classWriter.visitEnd();
+
+        Transformer transformer = new Transformer(classWriter.toByteArray());
+        List<VMethod> methods = transformer.translate();
+        VModule module = new VModule(transformer.typeNames(), methods.toArray(new VMethod[0]));
+
+        Value result = new Interpreter(module, 0).run();
+
+        assertEquals(Value.i32(3), result);
+    }
 
     @Test
     void checkcastTest() {

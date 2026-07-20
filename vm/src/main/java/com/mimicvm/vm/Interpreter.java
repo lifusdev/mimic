@@ -561,7 +561,7 @@ public final class Interpreter implements Opcodes {
                 case NEW -> {
                     final int fieldCount = cursor.nextU8();
                     final int typeIdx = cursor.nextU8();
-                    
+
                     final int ref = module.fieldTypes().length == fieldCount ? heap.alloc(fieldCount, typeIdx, module.fieldTypes()) : heap.alloc(fieldCount, typeIdx);
                     frame.stack().push(Value.ref(ref));
                 }
@@ -573,9 +573,31 @@ public final class Interpreter implements Opcodes {
                         frame.stack().push(Value.ref(heap.alloc(len))); //untyped
                     } else {
                         final Type elementType = DescUtils.arrElementType(module.typeName(typeIdx));
-                        final Value initialValue = elementType.defaultValue();
-                        frame.stack().push(Value.ref(heap.allocArray(len, typeIdx, initialValue)));
+                        final Value initVal = elementType.defaultValue();
+                        frame.stack().push(Value.ref(heap.allocArray(len, typeIdx, initVal)));
                     }
+                }
+
+                case MULTI_NEW_ARRAY -> {
+                    final int dimensions = cursor.nextU8();
+                    final int[] typeIndices = new int[dimensions];
+                    final Value[] initVals = new Value[dimensions];
+
+                    // from outside to inside
+                    for (int i = 0; i < dimensions; i++) {
+                        typeIndices[i] = cursor.nextU8();
+                        final Type elementType = DescUtils.arrElementType(module.typeName(typeIndices[i]));
+                        initVals[i] = elementType.defaultValue();
+                    }
+
+                    final int[] lens = new int[dimensions];
+
+                    // the last dimension is at the top of the stack
+                    for (int i = dimensions - 1; i >= 0; i--) {
+                        lens[i] = frame.stack().pop().asI32();
+                    }
+
+                    frame.stack().push(Value.ref(heap.allocMultiarray(lens, typeIndices, initVals)));
                 }
 
                 case ARRAY_GET -> {

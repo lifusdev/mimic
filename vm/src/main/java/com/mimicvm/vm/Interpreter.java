@@ -1,24 +1,25 @@
 package com.mimicvm.vm;
 
+import com.mimicvm.shared.call.StaticCall;
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.shared.code.VModule;
 import com.mimicvm.shared.op.Opcodes;
 import com.mimicvm.shared.type.Type;
 import com.mimicvm.shared.type.Value;
 import com.mimicvm.shared.utils.DescUtils;
+import com.mimicvm.vm.call.ICallInvoker;
+import com.mimicvm.vm.call.ReflectCallInvoker;
 import com.mimicvm.vm.frame.Cursor;
 import com.mimicvm.vm.frame.Frame;
 import com.mimicvm.vm.heap.Heap;
 import com.mimicvm.vm.utils.Utils;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class Interpreter implements Opcodes {
 
     private final VModule module;
+    private final ICallInvoker callInvoker;
 
     private final Deque<Frame> callStack = new ArrayDeque<>();
     private final Heap heap = new Heap();
@@ -27,11 +28,16 @@ public final class Interpreter implements Opcodes {
     private final Map<Integer, String> stringObjs = new HashMap<>();
 
     public Interpreter(VModule module, int methodIdx) {
-        this(module, methodIdx, new Value[0]);
+        this(module, methodIdx, new ReflectCallInvoker());
     }
 
     public Interpreter(VModule module, int methodIdx, Value... args) {
+        this(module, methodIdx, new ReflectCallInvoker(), args);
+    }
+
+    public Interpreter(VModule module, int methodIdx, ICallInvoker callInvoker, Value... args) {
         this.module = module;
+        this.callInvoker = Objects.requireNonNull(callInvoker, "callInvoker must not be null");
 
         //before the first method call
         for (int i = 0; i < module.staticTypes().length; i++) {
@@ -457,6 +463,24 @@ public final class Interpreter implements Opcodes {
                     }
 
                     callStack.push(calleeFrame);
+                }
+
+                case CALL_STATIC -> {
+                    final StaticCall call = (StaticCall) module.call(cursor.nextU8());
+                    final Value[] args = new Value[DescUtils.paramCount(call.desc())];
+
+                    // reverse order
+                    for (int i = args.length - 1; i >= 0; i--) {
+                        args[i] = frame.stack().pop();
+                    }
+
+                    final Value result = callInvoker.invoke(call, args);
+
+
+                    // void
+                    if (result != null) {
+                        frame.stack().push(result);
+                    }
                 }
 
                 case SWITCH -> {

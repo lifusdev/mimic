@@ -104,8 +104,7 @@ class TransformerTest {
         classWriter.visitEnd();
 
         Transformer transformer = new Transformer(classWriter.toByteArray());
-        List<VMethod> methods = transformer.translate();
-        VModule module = new VModule(transformer.typeNames(), methods.toArray(new VMethod[0]));
+        VModule module = transformer.module();
 
         Value result = new Interpreter(module, 0).run();
 

@@ -68,8 +68,57 @@ import static org.objectweb.asm.Opcodes.*;
 //    }
 //}
 
+//class Mimic {
+//    @VirtualizeMe
+//    public static int fiftyTwo() {
+//        String s = "52";
+//        return Integer.parseInt(s);
+//    }
+//}
+
 
 class TransformerTest {
+
+    @Test
+    void objCallResult() {
+        ClassWriter classWriter = new ClassWriter(0);
+        MethodVisitor methodVisitor;
+        AnnotationVisitor annotationVisitor0;
+
+        classWriter.visit(V21, ACC_SUPER, "com/mimicvm/transformer/Mimic", null, "java/lang/Object", null);
+
+        {
+            methodVisitor = classWriter.visitMethod(0, "<init>", "()V", null, null);
+            methodVisitor.visitCode();
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            methodVisitor.visitInsn(RETURN);
+            methodVisitor.visitMaxs(1, 1);
+            methodVisitor.visitEnd();
+        }
+        {
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "fiftyTwo", "()I", null, null);
+            {
+                annotationVisitor0 = methodVisitor.visitAnnotation("Lcom/mimicvm/annotations/VirtualizeMe;", false);
+                annotationVisitor0.visitEnd();
+            }
+            methodVisitor.visitCode();
+            methodVisitor.visitLdcInsn("52");
+            methodVisitor.visitVarInsn(ASTORE, 0);
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I", false);
+            methodVisitor.visitInsn(IRETURN);
+            methodVisitor.visitMaxs(1, 1);
+            methodVisitor.visitEnd();
+        }
+        classWriter.visitEnd();
+
+        final VModule module = new Transformer(classWriter.toByteArray()).module();
+        final Value result = new Interpreter(module, 0).run();
+
+        assertEquals(Value.i32(52), result);
+    }
+
 
     @Test
     void scallTest() {

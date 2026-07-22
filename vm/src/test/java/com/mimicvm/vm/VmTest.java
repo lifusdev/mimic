@@ -1,14 +1,40 @@
 package com.mimicvm.vm;
 
+import com.mimicvm.shared.call.StaticCall;
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.shared.code.VModule;
 import com.mimicvm.shared.op.Opcodes;
+import com.mimicvm.shared.type.Type;
 import com.mimicvm.shared.type.Value;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VmTest implements Opcodes {
+
+    @Test
+    void javaCallWithString() {
+        final byte[] insns = {
+                (byte) STRING_CONST, 0x0, // 0
+                (byte) CALL_STATIC, 0x0, // 0
+                (byte) RETURN
+        };
+
+        /*
+          String ref -> java call
+         */
+        final VModule module = new VModule(new String[0], // no classtypes
+                new String[]{"500"}, // 0
+                new Type[0], // no fields
+                new Type[0], // no static fields
+                new StaticCall[]{
+                        new StaticCall("java/lang/Integer", "parseInt", "(Ljava/lang/String;)I") // 0
+                }, new VMethod[]{
+                new VMethod(0, 1, 0, insns)
+        });
+
+        assertEquals(Value.i32(500), new Interpreter(module, 0).run());
+    }
 
     @Test
     void test1() {

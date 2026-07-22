@@ -24,21 +24,31 @@ public final class Interpreter implements Opcodes {
 
     private final Deque<Frame> callStack = new ArrayDeque<>();
     private final Heap heap = new Heap();
-    private final HostObjects hostObjects = new HostObjects();
+    private final HostObjects hostObjects;
 
     private final Map<Integer, Value> statics = new HashMap<>();
 
     public Interpreter(VModule module, int methodIdx) {
-        this(module, methodIdx, new ReflectCallInvoker());
+        this(module, methodIdx, new HostObjects());
     }
 
     public Interpreter(VModule module, int methodIdx, Value... args) {
-        this(module, methodIdx, new ReflectCallInvoker(), args);
+        this(module, methodIdx, new HostObjects(), args);
+    }
+
+    private Interpreter(VModule module, int methodIdx, HostObjects hostObjects, Value... args) {
+        // Interpreter and java calls share their objs
+        this(module, methodIdx, new ReflectCallInvoker(hostObjects), hostObjects, args);
     }
 
     public Interpreter(VModule module, int methodIdx, ICallInvoker callInvoker, Value... args) {
+        this(module, methodIdx, callInvoker, new HostObjects(), args);
+    }
+
+    private Interpreter(VModule module, int methodIdx, ICallInvoker callInvoker, HostObjects hostObjects, Value... args) {
         this.module = module;
         this.callInvoker = Objects.requireNonNull(callInvoker, "callInvoker must not be null");
+        this.hostObjects = Objects.requireNonNull(hostObjects, "hostObjects must not be null");
 
         //before the first method call
         for (int i = 0; i < module.staticTypes().length; i++) {
@@ -577,7 +587,7 @@ public final class Interpreter implements Opcodes {
                     final int poolIdx = cursor.nextU8();
                     final String str = module.constant(poolIdx);
                     final int ref = heap.alloc(0); // string has 0 instance fields
-                    
+
                     hostObjects.put(ref, str);
                     frame.stack().push(Value.ref(ref));
                 }

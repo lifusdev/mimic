@@ -76,8 +76,52 @@ import static org.objectweb.asm.Opcodes.*;
 //    }
 //}
 
+//class Mimic {
+//    @VirtualizeMe
+//    public static int instcall() {
+//        return "mimicvm".length();
+//    }
+//}
+
 
 class TransformerTest {
+
+    @Test
+    void instCall() {
+        ClassWriter classWriter = new ClassWriter(0);
+        MethodVisitor methodVisitor;
+        AnnotationVisitor annotationVisitor0;
+
+        classWriter.visit(V21, ACC_SUPER, "com/mimicvm/transformer/Mimic", null, "java/lang/Object", null);
+
+        {
+            methodVisitor = classWriter.visitMethod(0, "<init>", "()V", null, null);
+            methodVisitor.visitCode();
+            methodVisitor.visitVarInsn(ALOAD, 0);
+            methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            methodVisitor.visitInsn(RETURN);
+            methodVisitor.visitMaxs(1, 1);
+            methodVisitor.visitEnd();
+        }
+        {
+            methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "instcall", "()I", null, null);
+            {
+                annotationVisitor0 = methodVisitor.visitAnnotation("Lcom/mimicvm/annotations/VirtualizeMe;", false);
+                annotationVisitor0.visitEnd();
+            }
+            methodVisitor.visitCode();
+            methodVisitor.visitLdcInsn("mimicvm");
+            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "length", "()I", false);
+            methodVisitor.visitInsn(IRETURN);
+            methodVisitor.visitMaxs(1, 0);
+            methodVisitor.visitEnd();
+        }
+        classWriter.visitEnd();
+
+        final VModule module = new Transformer(classWriter.toByteArray()).module();
+
+        assertEquals(Value.i32(7), new Interpreter(module, 0).run());
+    }
 
     @Test
     void objCallResult() {

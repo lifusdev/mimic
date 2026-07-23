@@ -1,5 +1,6 @@
 package com.mimicvm.vm;
 
+import com.mimicvm.shared.call.InstCall;
 import com.mimicvm.shared.call.StaticCall;
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.shared.code.VModule;
@@ -11,6 +12,23 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VmTest implements Opcodes {
+
+    @Test
+    void instanceCall() {
+        final byte[] insns = {
+                (byte) STRING_CONST, 0x0, // 0
+                (byte) CALL_INSTANCE, 0x0, // 0
+                (byte) RETURN
+        };
+
+        final VModule module = new VModule(new String[0], new String[]{
+                "mimic"
+        }, new Type[0], new Type[0], new InstCall[]{new InstCall("java/lang/String", "length", "()I")}, new VMethod[]{
+                new VMethod(0, 1, 0, insns)
+        });
+
+        assertEquals(Value.i32(5), new Interpreter(module, 0).run());
+    }
 
     @Test
     void stringRef() {

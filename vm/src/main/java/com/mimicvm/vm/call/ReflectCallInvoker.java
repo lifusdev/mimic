@@ -1,5 +1,6 @@
 package com.mimicvm.vm.call;
 
+import com.mimicvm.shared.call.InstCall;
 import com.mimicvm.shared.call.StaticCall;
 import com.mimicvm.shared.type.Value;
 import com.mimicvm.vm.heap.Heap;
@@ -62,6 +63,32 @@ public final class ReflectCallInvoker implements ICallInvoker {
             return values.toValue(result, type.returnType());
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("static call failed: " + call, e);
+        }
+    }
+
+    @Override
+    public Value invoke(InstCall call, Value receiver, Value... args) {
+        try {
+            final Class<?> owner = Class.forName(call.owner().replace('/', '.'), true, loader);
+            final MethodType type = MethodType.fromMethodDescriptorString(call.desc(), loader);
+            final Method method = owner.getDeclaredMethod(call.name(), type.parameterArray());
+
+            if (Modifier.isStatic(method.getModifiers())) {
+                throw new IllegalArgumentException("method must not be static: " + call);
+            }
+
+            // the receiver is the target of the call
+            final Object target = Objects.requireNonNull(values.toJava(receiver, owner), "receiver must not be null");
+            final Object[] javaArgs = new Object[args.length];
+
+            for (int i = 0; i < args.length; i++) {
+                javaArgs[i] = values.toJava(args[i], type.parameterType(i));
+            }
+
+            final Object result = method.invoke(target, javaArgs);
+            return values.toValue(result, type.returnType());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("instance call failed: " + call, e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.mimicvm.vm;
 
+import com.mimicvm.shared.call.InstCall;
 import com.mimicvm.shared.call.StaticCall;
 import com.mimicvm.shared.code.VMethod;
 import com.mimicvm.shared.code.VModule;
@@ -491,6 +492,24 @@ public final class Interpreter implements Opcodes {
 
 
                     // void
+                    if (result != null) {
+                        frame.stack().push(result);
+                    }
+                }
+
+                case CALL_INSTANCE -> {
+                    final InstCall call = (InstCall) module.call(cursor.nextU8());
+                    final Value[] args = new Value[DescUtils.paramCount(call.desc())];
+
+                    // Params -> the receiver
+                    for (int i = args.length - 1; i >= 0; i--) {
+                        args[i] = frame.stack().pop();
+                    }
+
+                    final Value receiver = frame.stack().pop();
+                    final Value result = callInvoker.invoke(call, receiver, args);
+
+                    
                     if (result != null) {
                         frame.stack().push(result);
                     }

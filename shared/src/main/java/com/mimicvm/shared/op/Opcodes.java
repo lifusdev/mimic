@@ -115,6 +115,7 @@ public interface Opcodes {
     int CALL = 0x22;
     int CALL_STATIC = 0x23;
     int CALL_INSTANCE = 0x24;
+    int CALL_CTOR = 0x25;
 
     int JUMP = 0x30;
     int I32_EQ = 0x31;

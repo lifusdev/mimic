@@ -1,5 +1,6 @@
 package com.mimicvm.transformer.translator;
 
+import com.mimicvm.shared.call.CtorCall;
 import com.mimicvm.shared.call.InstCall;
 import com.mimicvm.shared.call.StaticCall;
 import com.mimicvm.shared.code.VMethod;
@@ -83,6 +84,12 @@ public final class MethodTranslator extends MethodVisitor {
             if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE) {
                 final int callIdx = calls.indexOf(new InstCall(owner, name, descriptor));
                 assembler.op(CALL_INSTANCE).u8(callIdx);
+            }
+
+            // constructors get their own vm instruction
+            if (opcode == Opcodes.INVOKESPECIAL && name.equals("<init>")) {
+                final int callIdx = calls.indexOf(new CtorCall(owner, descriptor));
+                assembler.op(CALL_CTOR).u8(callIdx);
             }
         }
     }
